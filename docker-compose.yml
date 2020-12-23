@@ -3,6 +3,11 @@ version: '3.3'
 services:
   cf:
     image: ghcr.io/silencebay/better-cloudflare-ip:latest
+    logging:
+      options:
+        max-size: '10m'
+        max-file: '3'
+    restart: unless-stopped
     environment:
     - CRON=0 */6 * * *
     - BANDWIDTH=20
