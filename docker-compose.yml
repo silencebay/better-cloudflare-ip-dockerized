@@ -1,0 +1,10 @@
+version: '3.3'
+
+services:
+  cf:
+    image: ghcr.io/silencebay/better-cloudflare-ip:latest
+    environment:
+    - CRON=0 */6 * * *
+    - BANDWIDTH=20
+    volumes:
+      - ./data:/data
