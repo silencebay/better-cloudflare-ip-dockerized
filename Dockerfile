@@ -24,7 +24,7 @@ RUN set -eux; \
     cd better-cloudflare-ip/linux; \
     sed -i -E "s/read -p .* bandwidth$/bandwidth=\$\{BANDWIDTH:-20\}/" ./src/cf.sh; \
     sed -i -E "s/\ *\.\/fping */fping /" ./src/cf.sh; \
-    echo 'echo $anycast > /data/ip.txt' >> ./src/cf.sh; \
+    echo -e '\necho $anycast > /data/ip.txt' >> ./src/cf.sh; \
     chmod +x ./configure; \
     ./configure; \
     make
