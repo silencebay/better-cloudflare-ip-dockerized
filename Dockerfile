@@ -24,7 +24,8 @@ RUN set -eux; \
     cd better-cloudflare-ip/linux; \
     sed -i -E "s/read -p .* bandwidth$/bandwidth=\$\{BANDWIDTH:-20\}/" ./src/cf.sh; \
     sed -i -E "s/\ *\.\/fping */fping /" ./src/cf.sh; \
-    echo -e '\necho $anycast > /data/ip.txt' >> ./src/cf.sh; \
+    echo -e '\n        echo $anycast > /data/ip.txt' >> ./src/cf.sh; \
+    echo -e '\n        env |grep GIST_ &>1 && gist.sh /data/ip.txt' >> ./src/cf.sh; \
     chmod +x ./configure; \
     ./configure; \
     make
@@ -37,6 +38,7 @@ ENV BANDWIDTH=20
 COPY --from=builder /go/better-cloudflare-ip/linux/src/fping /usr/local/bin/
 COPY --from=builder /go/better-cloudflare-ip/linux/src/cf.sh /usr/local/bin/
 COPY entrypoint.sh /usr/local/bin/
+COPY gist.sh /usr/local/bin/
 
 RUN set -eux; \
     \

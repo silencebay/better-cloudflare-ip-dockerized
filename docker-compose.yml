@@ -1,15 +1,18 @@
-version: '3.3'
+version: "3.3"
 
 services:
   cf:
     image: ghcr.io/silencebay/better-cloudflare-ip:latest
     logging:
       options:
-        max-size: '10m'
-        max-file: '3'
+        max-size: "10m"
+        max-file: "3"
     restart: unless-stopped
     environment:
-    - CRON=0 */6 * * *
-    - BANDWIDTH=20
+      - CRON=0 */6 * * *
+      - BANDWIDTH=20
+      - GIST_ID=foo
+      - GIST_TOKEN=foo
+      - GIST_FILENAME=foo.txt
     volumes:
       - ./data:/data
