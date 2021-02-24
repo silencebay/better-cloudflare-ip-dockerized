@@ -21,11 +21,17 @@ RUN set -eux; \
 	; \
     \
     git clone https://github.com/badafans/better-cloudflare-ip; \
-    cd better-cloudflare-ip/linux; \
+    cd better-cloudflare-ip; \
+    # apply a unmerged pull request
+    curl https://github.com/badafans/better-cloudflare-ip/commit/b6a1c0253a525a2dab0e752dae1947019d55688c.patch -o 49.patch; \
+    git apply --check 49.patch && git apply 49.patch; \
+    \
+    cd linux; \
     sed -i -E "s/read -p .* bandwidth$/bandwidth=\$\{BANDWIDTH:-20\}/" ./src/cf.sh; \
     sed -i -E "s/\ *\.\/fping */fping /" ./src/cf.sh; \
     echo -e '\n        echo $anycast > /data/ip.txt' >> ./src/cf.sh; \
     echo -e '\n        env |grep GIST_ &>1 && gist.sh /data/ip.txt' >> ./src/cf.sh; \
+    \
     chmod +x ./configure; \
     ./configure; \
     make
