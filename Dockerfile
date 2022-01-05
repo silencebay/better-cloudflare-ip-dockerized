@@ -2,6 +2,7 @@
 FROM --platform=$TARGETPLATFORM golang:alpine AS builder
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
+ARG UPSTREAM_LATEST_RELEASE_COMMIT
 
 WORKDIR /go
 RUN apk add git curl perl --no-cache
@@ -12,38 +13,30 @@ RUN set -eux; \
 	sed -i 's/uk.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories; \
 	apk --no-cache --no-progress upgrade; \
 	buildDeps=' \
-		build-base \
 		git \
     '; \
     \
     apk add --no-cache --virtual .build-deps \
 		$buildDeps \
-	; \
+	;
+
+RUN set -eux; \
     \
     git clone --depth 1 https://github.com/badafans/better-cloudflare-ip; \
     cd better-cloudflare-ip; \
-    # apply a unmerged pull request
-    curl https://github.com/badafans/better-cloudflare-ip/commit/b6a1c0253a525a2dab0e752dae1947019d55688c.patch -o 49.patch; \
-    git apply --check 49.patch && git apply 49.patch; \
-    \
-    cd linux; \
-    sed -i -E "s/read -p .* bandwidth$/bandwidth=\$\{BANDWIDTH:-20\}/" ./src/cf.sh; \
-    sed -i -E "s/update\.freecdn\.workers\.dev/cfip\.pages\.dev/g" ./src/cf.sh; \
-    sed -i -E "s/\ *\.\/fping */fping /" ./src/cf.sh; \
-    echo -e '\n        echo $anycast > /data/ip.txt' >> ./src/cf.sh; \
-    echo -e '\n        env |grep GIST_ &>1 && gist.sh /data/ip.txt' >> ./src/cf.sh; \
-    \
-    chmod +x ./configure; \
-    ./configure; \
-    make
+    sed -i -E "s/read -p .* bandwidth$/bandwidth=\$\{BANDWIDTH:-20\}/" ./shell/cf.sh; \
+    sed -i -E "s/read -p .* tasknum$/tasknum=\$\{TASKNUM:-25\}/" ./shell/cf.sh; \
+    sed -i -E "s/read -p .* menu$/menu=\$\{MENU:-1\}/" ./shell/cf.sh; \
+    echo -e '\n        echo $anycast > /data/ip.txt' >> ./shell/cf.sh; \
+    echo -e '\n        env |grep GIST_ &>1 && gist.sh /data/ip.txt' >> ./shell/cf.sh;
 
 FROM --platform=$TARGETPLATFORM alpine AS runtime
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 ENV BANDWIDTH=20
+ENV TASKNUM=25
 
-COPY --from=builder /go/better-cloudflare-ip/linux/src/fping /usr/local/bin/
-COPY --from=builder /go/better-cloudflare-ip/linux/src/cf.sh /usr/local/bin/
+COPY --from=builder /go/better-cloudflare-ip/shell/cf.sh /usr/local/bin/
 COPY entrypoint.sh /usr/local/bin/
 COPY gist.sh /usr/local/bin/
 
