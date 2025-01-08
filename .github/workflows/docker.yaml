@@ -33,7 +33,7 @@ jobs:
             -d '{ 
                   "query": "{repository(owner:\"'"$owner"'\", name:\"'"$repo"'\"){latestRelease{tagCommit {oid}}}}"
               }' https://api.github.com/graphql | jq -r '.data.repository.latestRelease.tagCommit.oid')
-          ${{ env.CORE_VERSION == '' }} || ${{ env.CORE_VERSION == 'latest' }} && echo "::set-output name=latest_release_commit::${latest_release_commit}"
+          ${{ env.CORE_VERSION == '' }} || ${{ env.CORE_VERSION == 'latest' }} && echo "latest_release_commit=${latest_release_commit}" >> $GITHUB_OUTPUT
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
