@@ -17,6 +17,14 @@ if [ -f $FILENAME ]; then
 EOF
 
     # 3. Use curl to send a POST request
-    curl -H "Authorization: token $GIST_TOKEN" -X POST -d "${DESC}" "https://api.github.com/gists/$GIST_ID"
+    status_code=$(curl -L -H "Authorization: token $GIST_TOKEN" -X PATCH -d "${DESC}" "https://api.github.com/gists/$GIST_ID" -w "%{http_code}" -o /dev/null)
+
+    if [ "$status_code" -eq 200 ]; then
+      echo "Gist updated successfully!"
+    else
+      echo "Gist update failed. Status code: $status_code"
+      # You can choose to print error details here, but be mindful that the body might be large.
+      # curl -H "Authorization: token $GIST_TOKEN" -X PATCH -d "${DESC}" "https://api.github.com/gists/$GIST_ID"
+    fi   
 
 fi
