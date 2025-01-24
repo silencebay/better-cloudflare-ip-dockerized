@@ -11,12 +11,12 @@ services:
       - CRON=0 */6 * * *
       - BANDWIDTH=20
       - ENABLED_TASKS=gist,dispatch
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
-      - GITHUB_REPO=${GITHUB_REPO}
-      - GITHUB_OWNER=${GITHUB_OWNER}
-      - GITHUB_WORKFLOW=${GITHUB_WORKFLOW:-main.yml}
-      - GITHUB_REF=${GITHUB_REF:-main}
-      - GITHUB_INPUTS=${GITHUB_INPUTS:-"{}"}
+      - DISPATCH_TOKEN=${GITHUB_TOKEN}
+      - DISPATCH_REPO=${GITHUB_REPO}
+      - DISPATCH_OWNER=${GITHUB_OWNER}
+      - DISPATCH_WORKFLOW=${GITHUB_WORKFLOW:-main.yml}
+      - DISPATCH_REF=${GITHUB_REF:-main}
+      - DISPATCH_INPUTS=${GITHUB_INPUTS:-"{}"}
       - TZ=Asia/Shanghai
     volumes:
       - ./data:/data
