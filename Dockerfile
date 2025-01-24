@@ -59,12 +59,13 @@ RUN <<EOF
         bash \
         curl \
         jq \
-		ca-certificates
+        ca-certificates
 
+    # Create custom tasks directory
     mkdir -p /app/tasks/custom
-    chmod 755 /app/tasks/custom
-    chmod +x /usr/local/bin/*
-    chmod +x /app/tasks/*
+    
+    # Set permissions for all script directories and files
+    chmod +x /usr/local/bin/* /app/tasks/*.sh /app/lib/*.sh /app/tasks/custom/*.sh
 EOF
 
 VOLUME [ "/data" ]

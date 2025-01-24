@@ -3,16 +3,13 @@
 # Exit on error
 set -e
 
-# Function for logging
-log() {
-    echo "[$(date)] [dispatch] $1"
-}
+# Source the logging library
+source "$(dirname "$0")/../lib/logging.sh"
 
 # Validate required environment variables
 for var in DISPATCH_TOKEN DISPATCH_OWNER DISPATCH_REPO DISPATCH_WORKFLOW DISPATCH_REF; do
     if [ -z "${!var}" ]; then
-        log "Error: $var is not set"
-        exit 1
+        fatal "$var is not set"
     fi
 done
 
@@ -21,8 +18,7 @@ INPUTS_JSON="${DISPATCH_INPUTS:-"{}"}"
 
 # Validate JSON format
 if ! echo "$INPUTS_JSON" | jq empty 2>/dev/null; then
-    log "Error: DISPATCH_INPUTS is not valid JSON"
-    exit 1
+    fatal "DISPATCH_INPUTS is not valid JSON"
 fi
 
 # Construct request body and send using heredoc
@@ -31,7 +27,7 @@ REQUEST_BODY=$(jq -n \
     --arg inputs "$INPUTS_JSON" \
     '{ref: $ref, inputs: ($inputs | fromjson | .)}')
 
-log "Triggering workflow dispatch with payload: $REQUEST_BODY"
+info "Triggering workflow dispatch with payload: $REQUEST_BODY"
 
 response=$(curl -L \
     -X POST \
@@ -51,9 +47,9 @@ status_code=$(echo "$response" | tail -n1)
 response_body=$(echo "$response" | sed '$d')
 
 if [ "$status_code" -eq 204 ]; then
-    log "Workflow dispatch triggered successfully!"
+    info "Workflow dispatch triggered successfully!"
 else
-    log "Workflow dispatch failed. Status code: $status_code"
-    [ -n "$response_body" ] && log "Response: $response_body"
+    error "Workflow dispatch failed. Status code: $status_code"
+    [ -n "$response_body" ] && error "Response: $response_body"
     exit 1
 fi 
