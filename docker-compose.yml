@@ -1,5 +1,3 @@
-version: "3.3"
-
 services:
   cf:
     image: ghcr.io/silencebay/better-cloudflare-ip:latest
@@ -8,11 +6,23 @@ services:
         max-size: "10m"
         max-file: "3"
     restart: unless-stopped
+    command: run
     environment:
       - CRON=0 */6 * * *
       - BANDWIDTH=20
-      - GIST_ID=foo
-      - GIST_TOKEN=foo
-      - GIST_FILENAME=foo.txt
+      - ENABLED_TASKS=gist,dispatch
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_REPO=${GITHUB_REPO}
+      - GITHUB_OWNER=${GITHUB_OWNER}
+      - GITHUB_WORKFLOW=${GITHUB_WORKFLOW:-main.yml}
+      - GITHUB_REF=${GITHUB_REF:-main}
+      - GITHUB_INPUTS=${GITHUB_INPUTS:-"{}"}
+      - TZ=Asia/Shanghai
     volumes:
       - ./data:/data
+      - ./tasks:/app/tasks:ro
+    # healthcheck:
+    #   test: ["CMD", "pgrep", "crond"]
+    #   interval: 1m
+    #   timeout: 10s
+    #   retries: 3

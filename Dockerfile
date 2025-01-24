@@ -50,9 +50,7 @@ ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
 COPY --from=builder /go/CloudflareSpeedTest /usr/local/bin/CloudflareSpeedTest
-COPY entrypoint.sh /usr/local/bin/
-COPY gist.sh /usr/local/bin/
-COPY test.sh /usr/local/bin/
+COPY root/. /
 
 RUN <<EOF
     set -eux
@@ -60,10 +58,11 @@ RUN <<EOF
     apk add --no-cache \
         bash \
         curl \
+        jq \
 		ca-certificates
 	
     chmod +x /usr/local/bin/*
-    echo "0 */6 * * * /usr/bin/flock -n /tmp/fcj.lockfile /usr/local/bin/test.sh > /proc/1/fd/1 2>/proc/1/fd/2" > /etc/crontabs/root;
+    chmod +x /app/tasks/*
 EOF
 
 VOLUME [ "/data" ]
