@@ -60,7 +60,9 @@ RUN <<EOF
         curl \
         jq \
 		ca-certificates
-	
+
+    mkdir -p /app/tasks/custom
+    chmod 755 /app/tasks/custom
     chmod +x /usr/local/bin/*
     chmod +x /app/tasks/*
 EOF

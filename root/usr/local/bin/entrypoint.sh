@@ -7,6 +7,9 @@ CRON="${CRON:-0 */6 * * *}"
 echo "$CRON /usr/bin/flock -n /tmp/tasks.lock /app/entrypoint.sh run > /proc/1/fd/1 2>/proc/1/fd/2" > /etc/crontabs/root
 
 if [ "$1" = "run" ]; then
+    # Run the core task
+    /app/tasks/test.sh
+
     # Get enabled tasks from environment variable
     ENABLED_TASKS=${ENABLED_TASKS:-"gist"}
 
@@ -15,12 +18,16 @@ if [ "$1" = "run" ]; then
 
     # Execute each enabled task
     for task in "${TASK_ARRAY[@]}"; do
-        task_script="/app/tasks/${task}.sh"
-        if [ -f "$task_script" ]; then
-            echo "[$(date)] Executing task: $task"
-            bash "$task_script"
+        # 首先检查是否存在自定义 task
+        if [ -f "/app/tasks/custom/${task}.sh" ]; then
+            echo "[$(date)] Executing custom task: $task"
+            bash "/app/tasks/custom/${task}.sh"
+        # 如果没有自定义 task，则执行默认 task
+        elif [ -f "/app/tasks/${task}.sh" ]; then
+            echo "[$(date)] Executing default task: $task"
+            bash "/app/tasks/${task}.sh"
         else
-            echo "[$(date)] Warning: Task script not found: $task_script"
+            echo "[$(date)] Warning: Task script not found: $task"
         fi
     done
 else

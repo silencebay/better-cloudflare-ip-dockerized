@@ -1,6 +1,7 @@
 #! /bin/bash
 
-FILENAME=$1
+# FILENAME=$1
+FILENAME=/data/ip.txt
 
 if [ -f $FILENAME ]; then
     CONTENT=$(sed -e 's/\r//' -e's/\t/\\t/g' -e 's/"/\\"/g' "${FILENAME}" | awk '{ printf($0 "\\n") }')
