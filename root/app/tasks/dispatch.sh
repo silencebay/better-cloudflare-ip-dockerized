@@ -17,7 +17,7 @@ for var in DISPATCH_TOKEN DISPATCH_OWNER DISPATCH_REPO DISPATCH_WORKFLOW DISPATC
 done
 
 # Use provided inputs JSON or empty object
-INPUTS_JSON="${DISPATCH_INPUTS:-{}}"
+INPUTS_JSON="${DISPATCH_INPUTS:-"{}"}"
 
 # Validate JSON format
 if ! echo "$INPUTS_JSON" | jq empty 2>/dev/null; then
@@ -25,13 +25,12 @@ if ! echo "$INPUTS_JSON" | jq empty 2>/dev/null; then
     exit 1
 fi
 
-# Construct the request body using jq
+# Construct request body and send using heredoc
 REQUEST_BODY=$(jq -n \
     --arg ref "$DISPATCH_REF" \
-    --argjson inputs "$INPUTS_JSON" \
-    '{ref: $ref, inputs: $inputs}')
+    --arg inputs "$INPUTS_JSON" \
+    '{ref: $ref, inputs: ($inputs | fromjson | .)}')
 
-# GitHub API request to trigger workflow
 log "Triggering workflow dispatch with payload: $REQUEST_BODY"
 
 response=$(curl -L \
@@ -41,9 +40,12 @@ response=$(curl -L \
     -H "X-GitHub-Api-Version: 2022-11-28" \
     -H "Content-Type: application/json" \
     "https://api.github.com/repos/${DISPATCH_OWNER}/${DISPATCH_REPO}/actions/workflows/${DISPATCH_WORKFLOW}/dispatches" \
-    -d "$REQUEST_BODY" \
     -w "\n%{http_code}" \
-    -s)
+    -s \
+    --data-binary @- << EOF
+$REQUEST_BODY
+EOF
+)
 
 status_code=$(echo "$response" | tail -n1)
 response_body=$(echo "$response" | sed '$d')
