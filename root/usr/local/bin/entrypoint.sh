@@ -3,9 +3,6 @@
 # Set default cron schedule if not provided
 CRON="${CRON:-0 */6 * * *}"
 
-# Create cron entry
-echo "$CRON /usr/bin/flock -n /tmp/tasks.lock /app/entrypoint.sh run > /proc/1/fd/1 2>/proc/1/fd/2" > /etc/crontabs/root
-
 if [ "$1" = "run" ]; then
     # Run the core task
     /app/tasks/test.sh
@@ -31,6 +28,16 @@ if [ "$1" = "run" ]; then
         fi
     done
 else
+    # Only create cron entry when starting crond
+    CRON_FILE="/etc/crontabs/root"
+    CRON_ENTRY="$CRON /usr/bin/flock -n /tmp/tasks.lock /usr/local/bin/entrypoint.sh run > /proc/1/fd/1 2>/proc/1/fd/2"
+    
+    # Check if crontab needs to be updated
+    if [ ! -f "$CRON_FILE" ] || ! grep -Fxq "$CRON_ENTRY" "$CRON_FILE"; then
+        echo "$CRON_ENTRY" > "$CRON_FILE"
+        echo "[$(date)] Updated crontab configuration"
+    fi
+
     # Start crond in foreground
-    crond -f -d 8
+    exec crond -f -d 8
 fi
