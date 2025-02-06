@@ -9,7 +9,7 @@ if ! command -v jq &> /dev/null; then
 fi
 
 # Default to /data/ip.txt if GIST_INPUT_FILES not set
-GIST_INPUT_FILES=${GIST_INPUT_FILES:-/data/ip.txt}
+GIST_INPUT_FILES=${GIST_INPUT_FILES:-/data/ips.txt}
 
 # Convert comma-separated strings to arrays
 IFS=',' read -ra FILE_ARRAY <<< "$GIST_INPUT_FILES"

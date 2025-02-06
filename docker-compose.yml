@@ -9,8 +9,9 @@ services:
     command: run
     environment:
       - CRON=0 */6 * * *
-      - BANDWIDTH=20
       - ENABLED_TASKS=unpack_cloudflare_geoip,test,gist,dispatch
+      - TOP_N=10
+      - OUTPUT_DIR=/data
       - DISPATCH_TOKEN=${GITHUB_TOKEN}
       - DISPATCH_REPO=${GITHUB_REPO}
       - DISPATCH_OWNER=${GITHUB_OWNER}
