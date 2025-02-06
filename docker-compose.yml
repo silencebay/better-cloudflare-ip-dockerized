@@ -17,6 +17,12 @@ services:
       - DISPATCH_WORKFLOW=${GITHUB_WORKFLOW:-main.yml}
       - DISPATCH_REF=${GITHUB_REF:-main}
       - DISPATCH_INPUTS=${GITHUB_INPUTS:-"{}"}
+      - GIST_TOKEN=${GITHUB_TOKEN}
+      - GIST_ID=${GIST_ID}
+      - GIST_INPUT_FILES=/data/ip.txt,/data/ip_v6.txt
+      - GIST_FILENAME_0=cloudflare-ips-v4.txt
+      - GIST_FILENAME_1=cloudflare-ips-v6.txt
+      - GIST_MERGE_FILENAME=cloudflare-ips.txt
       - TZ=Asia/Shanghai
     volumes:
       - ./data:/data
