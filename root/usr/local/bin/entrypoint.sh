@@ -4,9 +4,6 @@
 CRON="${CRON:-0 */6 * * *}"
 
 if [ "$1" = "run" ]; then
-    # Run the core task
-    /app/tasks/test.sh
-
     # Get enabled tasks from environment variable
     ENABLED_TASKS=${ENABLED_TASKS:-"gist"}
 
