@@ -15,9 +15,9 @@ GEOIP_CACHE_HOURS="${GEOIP_CACHE_HOURS:-24}"
 GEOIP_CACHE="/usr/local/share/cloudflare/geoip.dat"
 
 # Output file paths
-CLOUDFLARE_IPS_OUTPUT="/tmp/cloudflare_ips.txt"
-CLOUDFLARE_IPV4_OUTPUT="/tmp/cloudflare_ips_v4.txt"
-CLOUDFLARE_IPV6_OUTPUT="/tmp/cloudflare_ips_v6.txt"
+CLOUDFLARE_IPS_OUTPUT="/tmp/cloudflare-ips.txt"
+CLOUDFLARE_IPV4_OUTPUT="/tmp/cloudflare-ips-v4.txt"
+CLOUDFLARE_IPV6_OUTPUT="/tmp/cloudflare-ips-v6.txt"
 
 # Validate required environment variables
 if [ -z "$CLOUDFLARE_GEOIP_URL" ]; then
