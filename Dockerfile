@@ -56,6 +56,7 @@ RUN <<EOF
     set -eux
 
     apk add --no-cache \
+        tini \
         bash \
         curl \
         jq \
@@ -72,5 +73,5 @@ VOLUME [ "/data" ]
 
 WORKDIR /
 
-ENTRYPOINT [ "entrypoint.sh" ]
-CMD ["crond", "-f", "-d", "8"]
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["/usr/local/bin/entrypoint.sh"]
