@@ -11,6 +11,9 @@ fi
 # Default to /data/ip.txt if GIST_INPUT_FILES not set
 GIST_INPUT_FILES=${GIST_INPUT_FILES:-/data/ips.txt}
 
+# Default GitHub Gist API URL
+GIST_BASE_URL=${GIST_BASE_URL:-https://gist.github.com}
+
 # Convert comma-separated strings to arrays
 IFS=',' read -ra FILE_ARRAY <<< "$GIST_INPUT_FILES"
 IFS=',' read -ra FILENAME_ARRAY <<< "${GIST_FILENAME:-}"
@@ -91,7 +94,7 @@ response=$(curl -L \
     -H "Content-Type: application/json" \
     -w "\n%{http_code}" \
     -s \
-    "https://api.github.com/gists/$GIST_ID" \
+    "$GIST_BASE_URL/gists/$GIST_ID" \
     --data-binary @- << EOF
 $json_content
 EOF
