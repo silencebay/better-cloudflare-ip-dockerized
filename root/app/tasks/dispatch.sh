@@ -6,6 +6,9 @@ set -e
 # Source the logging library
 source "$(dirname "$0")/../lib/logging.sh"
 
+# Default GitHub API URL
+DISPATCH_BASE_URL=${DISPATCH_BASE_URL:-https://api.github.com}
+
 # Validate required environment variables
 for var in DISPATCH_TOKEN DISPATCH_OWNER DISPATCH_REPO DISPATCH_WORKFLOW DISPATCH_REF; do
     if [ -z "${!var}" ]; then
@@ -35,7 +38,7 @@ response=$(curl -L \
     -H "Authorization: Bearer $DISPATCH_TOKEN" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
     -H "Content-Type: application/json" \
-    "https://api.github.com/repos/${DISPATCH_OWNER}/${DISPATCH_REPO}/actions/workflows/${DISPATCH_WORKFLOW}/dispatches" \
+    "${DISPATCH_BASE_URL}/repos/${DISPATCH_OWNER}/${DISPATCH_REPO}/actions/workflows/${DISPATCH_WORKFLOW}/dispatches" \
     -w "\n%{http_code}" \
     -s \
     --data-binary @- << EOF
@@ -52,4 +55,4 @@ else
     error "Workflow dispatch failed. Status code: $status_code"
     [ -n "$response_body" ] && error "Response: $response_body"
     exit 1
-fi 
+fi
