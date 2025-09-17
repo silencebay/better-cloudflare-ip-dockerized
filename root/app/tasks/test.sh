@@ -23,7 +23,7 @@ cd "$WORK_DIR" || fatal "Failed to change to work directory $WORK_DIR"
 
 # Run speed test
 info "Starting CloudflareSpeedTest with args: $ARGS"
-./CloudflareST $ARGS -o "$RESULT_FILE"
+./cfst $ARGS -o "$RESULT_FILE"
 
 if [ ! -f "$RESULT_FILE" ]; then
     fatal "Speed test result file $RESULT_FILE not found"

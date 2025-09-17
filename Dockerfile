@@ -49,7 +49,7 @@ FROM --platform=$TARGETPLATFORM alpine AS runtime
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
-COPY --from=builder /go/CloudflareSpeedTest /usr/local/bin/CloudflareSpeedTest
+COPY --from=builder /go/cfst /usr/local/bin/cfst
 COPY root/. /
 
 RUN <<EOF
