@@ -9,7 +9,7 @@ services:
     command: run
     environment:
       - CRON=0 */6 * * *
-      - ENABLED_TASKS=unpack_cloudflare_geoip,test,gist,dispatch
+      - ENABLED_TASKS=unpack_cloudflare_geoip,test,filter_status,gist,dispatch
       - TOP_N=10
       - OUTPUT_DIR=/data
       - V2DAT_URL=https://github.com/m0xbf/v2dat/releases/download/v20240712/v2dat_20240712_amd64
