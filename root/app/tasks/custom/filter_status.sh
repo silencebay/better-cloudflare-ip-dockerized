@@ -23,11 +23,14 @@ OUTPUT_LIMIT=${FILTER_OUTPUT_LIMIT:-${TOP_N:-10}}
 #   status code (still requires a successful HTTP response). 000 (connection
 #   failure/timeout) is not an HTTP status code and always fails. Redirects
 #   are NOT followed (no -L), so a 301 means the edge returned 301 directly.
+# FILTER_ALLOW_EMPTY: when no IP matches FILTER_ACCEPT_STATUS, write an empty
+#   result.csv instead of keeping the previous one (default: false).
 FILTER_PROBE_URL=${FILTER_PROBE_URL:-https://speed.cloudflare.com}
 FILTER_ACCEPT_STATUS=${FILTER_ACCEPT_STATUS:-200}
 FILTER_TIMEOUT=${FILTER_TIMEOUT:-5}
 FILTER_CONCURRENCY=${FILTER_CONCURRENCY:-20}
 FILTER_PROBE_ROWS=${FILTER_PROBE_ROWS:-200}
+FILTER_ALLOW_EMPTY=${FILTER_ALLOW_EMPTY:-false}
 
 # The result file must exist and contain data
 if [ ! -s "$RESULT_FILE" ]; then
@@ -120,6 +123,14 @@ require_integer_in_range FILTER_CONCURRENCY "$FILTER_CONCURRENCY" 1 1024
 require_integer_in_range FILTER_PROBE_ROWS "$FILTER_PROBE_ROWS" 0 100000
 require_integer_in_range OUTPUT_LIMIT "$OUTPUT_LIMIT" 1 100000
 
+if [ "${FILTER_ALLOW_EMPTY,,}" = "true" ] || [ "${FILTER_ALLOW_EMPTY,,}" = "1" ]; then
+    FILTER_ALLOW_EMPTY=true
+elif [ "${FILTER_ALLOW_EMPTY,,}" = "false" ] || [ "${FILTER_ALLOW_EMPTY,,}" = "0" ]; then
+    FILTER_ALLOW_EMPTY=false
+else
+    fatal "FILTER_ALLOW_EMPTY must be true or false (got: $FILTER_ALLOW_EMPTY)"
+fi
+
 mkdir -p "$OUTPUT_DIR"
 
 # Derive host/port from the probe URL; fail fast on malformed values
@@ -209,10 +220,13 @@ status_summary=$(awk '{print $2}' "$STATUS_FILE" | sort | uniq -c | sort -rn | a
 info "Status distribution: $status_summary"
 
 # If everything failed, keep the previous results rather than publishing an
-# empty list (stale but working beats broken)
+# empty list (stale but working beats broken) unless explicitly overridden.
 if [ "$good_count" -eq 0 ]; then
-    warning "No IP matched FILTER_ACCEPT_STATUS against $FILTER_PROBE_URL, keeping previous results"
-    exit 0
+    warning "No IP matched FILTER_ACCEPT_STATUS against $FILTER_PROBE_URL"
+    if [ "$FILTER_ALLOW_EMPTY" != "true" ]; then
+        warning "Keeping previous results (set FILTER_ALLOW_EMPTY=true to write empty)"
+        exit 0
+    fi
 fi
 
 # Rebuild result.csv keeping only the IPs that passed the status allowlist (original order)
@@ -226,7 +240,7 @@ mv "$WORK_DIR/result.new" "$RESULT_FILE"
 # Re-derive the IP lists from the filtered results (same logic as test.sh)
 best_ips=$(tail -n +2 "$RESULT_FILE" | head -n "$OUTPUT_LIMIT" | awk -F, '{print $1}')
 if [ -z "$best_ips" ]; then
-    fatal "No IPs left in result file after filtering"
+    warning "No IPs left in result file after filtering"
 fi
 
 echo "$best_ips" > "$OUTPUT_DIR/ips.txt"
