@@ -5,7 +5,7 @@ set -e
 source "$(dirname "$0")/../lib/logging.sh"
 
 # Configuration with environment variables and defaults
-WORK_DIR=${WORK_DIR:-/usr/local/bin/CloudflareSpeedTest}
+WORK_DIR=${WORK_DIR:-/usr/local/bin/cfst}
 RESULT_FILE=${RESULT_FILE:-/tmp/result.csv}
 TOP_N=${TOP_N:-10}
 OUTPUT_DIR=${OUTPUT_DIR:-/data}

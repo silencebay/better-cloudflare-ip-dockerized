@@ -32,7 +32,9 @@ RUN <<EOF
     esac
 
     repo_api="https://api.github.com/repos/XIU2/CloudflareSpeedTest/releases"
-    asset_pattern="^CloudflareST_.*${architecture}\."
+    # Upstream asset names: cfst_linux_amd64.tar.gz, cfst_linux_arm64.tar.gz,
+    # cfst_linux_armv7.tar.gz (renamed from CloudflareST_* in v2.3.1+)
+    asset_pattern="^cfst_.*${architecture}\.tar\.gz$"
     core_download_url=$(curl -L "${repo_api}?per_page=100" \
         | jq -r --arg asset "${asset_pattern}" '
         [.[] | select((.assets | length) > 0)]
@@ -41,8 +43,18 @@ RUN <<EOF
         | select (.name | test($asset))
         | .browser_download_url' -)
 
-    mkdir CloudflareSpeedTest
-    (cd CloudflareSpeedTest && curl -L "${core_download_url}" | tar -xzvf -)
+    if [ -z "${core_download_url}" ]; then
+        echo "No matching release asset found for pattern: ${asset_pattern}" >&2
+        exit 1
+    fi
+
+    mkdir cfst
+    # Extract and flatten: archives contain a single top-level directory
+    # cfst_<os>_<arch>/ since v2.3.1. The shipped binary is mode 644,
+    # so restore the exec bit.
+    (cd cfst && curl -L "${core_download_url}" | tar -xz \
+        && mv "cfst_${architecture}"/* . && rmdir "cfst_${architecture}" \
+        && chmod +x cfst)
 EOF
 
 FROM --platform=$TARGETPLATFORM alpine AS runtime
